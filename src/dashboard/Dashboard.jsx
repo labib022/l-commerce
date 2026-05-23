@@ -8,7 +8,7 @@ import {
   PlusIcon,
   TagIcon
 } from '@heroicons/react/24/outline';
-import api from '../../services/api';
+import api from '../services/api';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({ products: 0, orders: 0, users: 0, revenue: 0 });

@@ -12,6 +12,7 @@
     "@heroicons/react": "^2.2.0",
     "@stripe/stripe-js": "^9.6.0",
     "axios": "^1.7.0",
+    "firebase": "^12.13.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.0.0"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import api from '../services/api';
 import ProductCard from '../components/ProductCard';
 import { FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
@@ -21,10 +21,14 @@ const ProductList = () => {
 
   const location = useLocation();
 
+  // ✅ URL change হলে category/keyword update হবে
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    setKeyword(params.get('keyword') || '');
-    setSelectedCategory(params.get('category') || '');
+    const cat = params.get('category') || '';
+    const kw = params.get('keyword') || '';
+    setSelectedCategory(cat);
+    setKeyword(kw);
+    setCurrentPage(1);
   }, [location.search]);
 
   useEffect(() => {
@@ -40,6 +44,7 @@ const ProductList = () => {
       if (selectedCategory) params.append('category', selectedCategory);
       if (minPrice) params.append('minPrice', minPrice);
       if (maxPrice) params.append('maxPrice', maxPrice);
+      if (sortBy) params.append('sort', sortBy);
 
       const response = await api.get(`/products?${params}`);
       setProducts(response.data.products);
@@ -49,7 +54,7 @@ const ProductList = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, keyword, selectedCategory, minPrice, maxPrice]);
+  }, [currentPage, keyword, selectedCategory, minPrice, maxPrice, sortBy]);
 
   useEffect(() => {
     fetchProducts();
@@ -69,14 +74,14 @@ const ProductList = () => {
     setCurrentPage(1);
   };
 
-  const handleFilterChange = useCallback(() => {
+  const clearFilters = () => {
+    setSelectedCategory('');
+    setMinPrice('');
+    setMaxPrice('');
+    setRating('');
+    setKeyword('');
     setCurrentPage(1);
-    if (isFilterOpen) setIsFilterOpen(false);
-  }, [isFilterOpen]);
-
-  useEffect(() => {
-    handleFilterChange();
-  }, [selectedCategory, minPrice, maxPrice, rating]);
+  };
 
   const SkeletonCard = () => (
     <div className="bg-gray-200 rounded-lg h-64 animate-pulse"></div>
@@ -101,7 +106,10 @@ const ProductList = () => {
               <input
                 type="checkbox"
                 checked={selectedCategory === cat._id}
-                onChange={() => setSelectedCategory(cat._id)}
+                onChange={() => {
+                  setSelectedCategory(cat._id);
+                  setCurrentPage(1);
+                }}
                 className="mr-2"
               />
               <span>{cat.name}</span>
@@ -145,13 +153,7 @@ const ProductList = () => {
       </div>
 
       <button
-        onClick={() => {
-          setSelectedCategory('');
-          setMinPrice('');
-          setMaxPrice('');
-          setRating('');
-          setKeyword('');
-        }}
+        onClick={clearFilters}
         className="w-full text-blue-600 py-2 border border-blue-600 rounded-lg hover:bg-blue-50"
       >
         Clear Filters
@@ -162,7 +164,14 @@ const ProductList = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold">Products</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">
+          Products
+          {selectedCategory && categories.find(c => c._id === selectedCategory) && (
+            <span className="text-blue-600 ml-2 text-lg font-normal">
+              — {categories.find(c => c._id === selectedCategory)?.name}
+            </span>
+          )}
+        </h1>
         <div className="flex items-center gap-4 w-full sm:w-auto">
           <form onSubmit={handleSearch} className="flex-1 sm:flex-initial">
             <input
@@ -176,7 +185,7 @@ const ProductList = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="px-3 py-2 border rounded-lg"
           >
             <option value="latest">Latest</option>
             <option value="price-low">Price: Low to High</option>
@@ -217,9 +226,7 @@ const ProductList = () => {
         <div className="flex-1">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(12)].map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
+              {[...Array(12)].map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : error ? (
             <div className="text-center py-12">
@@ -229,6 +236,12 @@ const ProductList = () => {
             <div className="text-center py-12">
               <h3 className="text-xl font-semibold mb-2">No products found</h3>
               <p className="text-gray-600">Try adjusting your filters or search terms</p>
+              <button
+                onClick={clearFilters}
+                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg"
+              >
+                Clear Filters
+              </button>
             </div>
           ) : (
             <>
@@ -252,8 +265,8 @@ const ProductList = () => {
                       key={i + 1}
                       onClick={() => setCurrentPage(i + 1)}
                       className={`px-4 py-2 rounded ${
-                        currentPage === i + 1 
-                          ? 'bg-blue-600 text-white' 
+                        currentPage === i + 1
+                          ? 'bg-blue-600 text-white'
                           : 'bg-gray-200 hover:bg-gray-300'
                       }`}
                     >
