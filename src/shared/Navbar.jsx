@@ -54,6 +54,7 @@ const Navbar = () => {
       <nav className="sticky top-0 z-50 bg-white shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
+
             {/* Logo */}
             <Link to="/" className="flex-shrink-0 flex items-center gap-1">
               <span className="text-2xl">🛒</span>
@@ -75,16 +76,6 @@ const Navbar = () => {
                 <NavLink to="/categories" className={({ isActive }) =>
                   `text-sm font-medium transition-colors ${isActive ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`
                 }>Categories</NavLink>
-                {user && (
-                  <NavLink to="/orders" className={({ isActive }) =>
-                    `text-sm font-medium transition-colors ${isActive ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`
-                  }>Orders</NavLink>
-                )}
-                {isAdmin && (
-                  <NavLink to="/admin/dashboard" className={({ isActive }) =>
-                    `text-sm font-medium transition-colors ${isActive ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`
-                  }>Admin</NavLink>
-                )}
               </div>
             </div>
 
@@ -105,20 +96,52 @@ const Navbar = () => {
                   >
                     {getUserInitials()}
                   </button>
+
                   {isUserDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl py-2 border border-gray-100">
+                    <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl py-2 border border-gray-100">
+
+                      {/* User Info */}
+                      <div className="px-4 py-2 border-b border-gray-100 mb-1">
+                        <p className="font-semibold text-gray-800 text-sm truncate">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {user.email}
+                        </p>
+                      </div>
+
+                      {/* Dashboard - for ALL users */}
                       <Link
-                        to="/profile"
+                        to="/dashboard"
                         onClick={() => setIsUserDropdownOpen(false)}
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors text-sm"
                       >
-                        Profile
+                        <span>👤</span>
+                        <span>Dashboard</span>
                       </Link>
+
+                      {/* Admin Dashboard - ONLY for admin */}
+                      {isAdmin && (
+                        <Link
+                          to="/admin/dashboard"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+                        >
+                          <span>⚙️</span>
+                          <span>Admin Dashboard</span>
+                        </Link>
+                      )}
+
+                      {/* Divider */}
+                      <div className="border-t border-gray-100 my-1" />
+
+                      {/* Logout */}
                       <button
                         onClick={handleLogoutClick}
-                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
+                        className="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors text-sm"
                       >
-                        Logout
+                        <span>🚪</span>
+                        <span>Logout</span>
                       </button>
                     </div>
                   )}
@@ -126,11 +149,13 @@ const Navbar = () => {
               )}
 
               {/* Cart Icon */}
-              <button onClick={() => navigate('/cart')} className="relative bg-blue-500 p-2 rounded-full hover:bg-blue-600 transition-colors">
+              <button
+                onClick={() => navigate('/cart')}
+                className="relative bg-blue-500 p-2 rounded-full hover:bg-blue-600 transition-colors"
+              >
                 <img src={cartIcon} alt="cart" className="w-7 h-7 object-contain" />
                 {itemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-black 
-                   text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                     {itemCount}
                   </span>
                 )}
@@ -164,16 +189,10 @@ const Navbar = () => {
                   `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`
                 }>Categories</NavLink>
               {user && (
-                <NavLink to="/orders" onClick={() => setIsMenuOpen(false)}
+                <NavLink to="/dashboard" onClick={() => setIsMenuOpen(false)}
                   className={({ isActive }) =>
                     `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`
-                  }>Orders</NavLink>
-              )}
-              {isAdmin && (
-                <NavLink to="/admin/dashboard" onClick={() => setIsMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`
-                  }>Admin</NavLink>
+                  }>Dashboard</NavLink>
               )}
             </div>
 
@@ -191,7 +210,7 @@ const Navbar = () => {
                   onClick={handleLogoutClick}
                   className="w-full py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                 >
-                  Logout
+                  🚪 Logout
                 </button>
               )}
             </div>
@@ -199,33 +218,25 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* ✅ Logout Confirmation Modal */}
+      {/* Logout Confirmation Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black bg-opacity-50"
             onClick={handleLogoutCancel}
           />
-
-          {/* Modal */}
-          <div className="relative bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4 animate-fadeIn">
-            {/* Icon */}
+          <div className="relative bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4">
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
                 <span className="text-3xl">👋</span>
               </div>
             </div>
-
-            {/* Text */}
             <h3 className="text-xl font-bold text-center text-gray-800 mb-2">
               Are you sure?
             </h3>
             <p className="text-gray-500 text-center text-sm mb-6">
               You want to logout from your account?
             </p>
-
-            {/* Buttons */}
             <div className="flex gap-3">
               <button
                 onClick={handleLogoutCancel}

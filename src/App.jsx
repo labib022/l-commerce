@@ -10,6 +10,7 @@ import ProductDetail from './pages/ProductDetail';
 import Cart from './cart/Cart';
 import Checkout from './pages/Checkout';
 import OrderHistory from './pages/OrderHistory';
+import UserDashboard from './pages/UserDashboard';
 
 // ✅ Admin → dashboard folder এ আছে
 import AdminDashboard from './dashboard/Dashboard';
@@ -25,6 +26,7 @@ import ResetPassword from './auth/ResetPassword';
 
 // ✅ Category
 import CategoryList from './category/CategoryList';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -41,6 +43,11 @@ function App() {
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/orders" element={<OrderHistory />} />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <UserDashboard />
+                  </ProtectedRoute>
+                } />
                 <Route path="/categories" element={<CategoryList />} />
 
                 {/* Auth Routes */}
